@@ -193,5 +193,3 @@ export async function embedText(text: string): Promise<number[] | null> {
     return null;
   }
 }
-
-import { parseFileContent, validateUploadFile, FileParseError } from '../ai/file-parser.js';
