@@ -301,5 +301,18 @@ export const api = {
   getSupportedTypes: () => request<{ uploads: Record<string, { ext: string; description: string }>; pasteTypes: string[] }>('/api/rag/supported-types'),
   getDemoData: () => request<DemoDataSummary>('/api/rag/demo-data'),
   getSampleDatasets: () => request<{ id: string; name: string; type: string; content: string }[]>('/api/demo/sample-datasets'),
-  resetDemo: () => request('/api/demo/reset', { method: 'POST' })
+  resetDemo: () => request('/api/demo/reset', { method: 'POST' }),
+  getUnifyAnalyticsStatus: () =>
+    request<{ service: string; mode: 'live' | 'simulated'; provider: string; baseUrl: string; origin: string; writeKeyConfigured: boolean; eventsLogged: number; eventTypes: string[] }>(
+      '/api/unify/analytics/status'
+    ),
+  getUnifyAnalyticsEvents: () =>
+    request<Array<{ id: string; type: string; name?: string; visitorId: string; mode: 'live' | 'simulated'; ok: boolean; status?: number; error?: string; sentAt: string }>>(
+      '/api/unify/analytics/events'
+    ),
+  trackUnifyEvent: (name: string, properties?: Record<string, unknown>) =>
+    request<{ id: string; ok: boolean; mode: 'live' | 'simulated' }>('/api/unify/analytics/track', {
+      method: 'POST',
+      body: JSON.stringify({ name, properties })
+    })
 };

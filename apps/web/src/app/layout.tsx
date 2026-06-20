@@ -3,8 +3,8 @@ import { AppShell } from '@/components/AppShell';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'ProofLoop — Turn hidden customer proof into your growth engine',
-  description: 'ProofLoop discovers hidden customer proof and transforms it into growth assets.'
+  title: 'Corroba — Turn hidden customer proof into your growth engine',
+  description: 'Corroba discovers hidden customer proof and transforms it into growth assets.'
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

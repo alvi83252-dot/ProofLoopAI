@@ -14,7 +14,7 @@ import { ingestUnifyConversations, bootstrapRagIndex } from './rag/pipeline.js';
 
 const port = Number(process.env.PORT ?? 3001);
 
-console.log(`🚀 ProofLoop API running on http://localhost:${port}`);
+console.log(`🚀 Corroba API running on http://localhost:${port}`);
 console.log(`   Demo mode: ${process.env.AI_DEMO_MODE !== 'false' ? 'ON' : 'OFF'}`);
 
 bootstrapRagIndex().then((r) => {

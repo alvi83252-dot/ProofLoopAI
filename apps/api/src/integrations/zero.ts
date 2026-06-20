@@ -31,7 +31,7 @@ export interface ZeroRecordPayload {
   title: string;
   body: string;
   source: {
-    app: 'ProofLoop';
+    app: 'Corroba';
     workspaceId: string;
   };
   metadata: Record<string, unknown>;
@@ -70,7 +70,7 @@ function buildExternalId(input: ZeroSyncInput) {
     getString(input.crmEntry?.id) ||
     getString(input.source?.id, 'unknown');
 
-  return `proofloop:${workspaceId}:${input.type}:${entityId}`;
+  return `corroba:${workspaceId}:${input.type}:${entityId}`;
 }
 
 export function buildZeroRecordPayload(input: ZeroSyncInput): ZeroRecordPayload {
@@ -90,10 +90,10 @@ export function buildZeroRecordPayload(input: ZeroSyncInput): ZeroRecordPayload 
     getString(crmEntry.title) ||
     getString(entity.title) ||
     getString(source.title) ||
-    `${input.type.replace(/_/g, ' ')} from ProofLoop`;
+    `${input.type.replace(/_/g, ' ')} from Corroba`;
 
   const proofScore = getNumber(entity.proofScore);
-  const body = input.body ?? (quote || content.slice(0, 1200) || `${title} synced from ProofLoop.`);
+  const body = input.body ?? (quote || content.slice(0, 1200) || `${title} synced from Corroba.`);
 
   return {
     externalId: buildExternalId({ ...input, workspaceId }),
@@ -101,7 +101,7 @@ export function buildZeroRecordPayload(input: ZeroSyncInput): ZeroRecordPayload 
     title,
     body,
     source: {
-      app: 'ProofLoop',
+      app: 'Corroba',
       workspaceId
     },
     metadata: {

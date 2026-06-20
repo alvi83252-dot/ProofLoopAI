@@ -71,7 +71,7 @@ export default function SettingsPage() {
       )}
       <Card className="space-y-4">
         <h2 className="font-semibold">Integrations</h2>
-        <p className="text-sm text-muted-foreground">Partner tools that power ProofLoop features.</p>
+        <p className="text-sm text-muted-foreground">Partner tools that power Corroba features.</p>
         <div className="grid gap-3 md:grid-cols-2">
           {integrations.map((integration) => (
             <div key={integration.key} className="rounded-lg border border-border p-4 space-y-2 hover:border-primary/30 hover:bg-primary/5 transition-all">

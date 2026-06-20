@@ -23,7 +23,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
             </svg>
           </div>
           <div>
-            <h1 className="font-bold text-lg gradient-text">ProofLoop</h1>
+            <h1 className="font-bold text-lg gradient-text">Corroba</h1>
             <p className="text-[10px] text-muted-foreground">Proof → Growth Engine</p>
           </div>
         </div>

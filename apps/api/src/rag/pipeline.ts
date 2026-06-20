@@ -296,7 +296,7 @@ async function generateWithOpenAI(query: string, contexts: string[]): Promise<st
         {
           role: 'system',
           content:
-            'You are ProofLoop RAG. Answer using ONLY the provided context from uploaded documents, demo-data guidance, and Unify conversations. Focus on customer proof, ROI, trust signals, and ICP insights.'
+            'You are Corroba RAG. Answer using ONLY the provided context from uploaded documents, demo-data guidance, and customer conversations. Focus on customer proof, ROI, trust signals, and ICP insights.'
         },
         {
           role: 'user',
