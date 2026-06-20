@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { api, type TrustSignal } from '@/lib/api';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
+import { ProofSignalPicker, cleanTrustSignals } from '@/components/ProofSignalPicker';
 
 interface ContentAsset {
   id?: string;
@@ -22,9 +23,15 @@ export default function ContentPage() {
   const [poweredBy, setPoweredBy] = useState('demo');
   const [expanded, setExpanded] = useState<string | null>(null);
 
+  const cleanedSignals = useMemo(() => cleanTrustSignals(signals), [signals]);
+
   useEffect(() => {
     api.getContent().then((d) => setAssets(d as ContentAsset[]));
-    api.getTrustSignals().then((s) => { setSignals(s); if (s.length) setSelectedSignal(s[0].id); });
+    api.getTrustSignals().then((s) => {
+      setSignals(s);
+      const cleaned = cleanTrustSignals(s);
+      if (cleaned.length) setSelectedSignal(cleaned[0].id);
+    });
   }, []);
 
   async function generate() {
@@ -46,11 +53,17 @@ export default function ContentPage() {
           <h1 className="text-3xl font-bold gradient-text">Content Studio</h1>
           <p className="text-muted-foreground mt-2">Transform proof into LinkedIn posts, emails, case studies, and landing page assets.</p>
         </div>
-        <div className="flex gap-3">
-          <select value={selectedSignal} onChange={(e) => setSelectedSignal(e.target.value)} className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50">
-            {signals.map((s) => <option key={s.id} value={s.id}>{s.signalType} — {s.proofScore}/100</option>)}
-          </select>
-          <Button onClick={generate} disabled={generating}>{generating ? 'Generating...' : 'Generate Assets'}</Button>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+          <div className="w-full sm:max-w-md">
+            <ProofSignalPicker
+              signals={cleanedSignals}
+              value={selectedSignal}
+              onChange={setSelectedSignal}
+            />
+          </div>
+          <Button onClick={generate} disabled={generating || !selectedSignal} className="shrink-0">
+            {generating ? 'Generating...' : 'Generate Assets'}
+          </Button>
         </div>
       </div>
       <Badge className="bg-secondary text-muted-foreground">Powered by: {poweredBy === 'faxxing' ? 'Faxxing' : 'Demo Mode'}</Badge>

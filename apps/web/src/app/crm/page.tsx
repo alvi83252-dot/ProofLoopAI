@@ -73,19 +73,10 @@ export default function CrmPage() {
           Store proof assets, trust signals, GTM assets, campaigns, and conversion outcomes.
         </p>
       </div>
-
-      {entries.length > 0 && entries.some((e) => e.zeroSync.status === 'not_configured') && (
-        <Card className="border-amber-500/30 bg-amber-500/5">
-          <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 mb-2">Zero Not Configured</Badge>
-          <p className="text-sm text-muted-foreground">
-            Add <code className="text-primary">ZERO_API_KEY</code> and{' '}
-            <code className="text-primary">ZERO_API_URL</code> to .env to sync.
-          </p>
-        </Card>
-      )}
-
-      {message && <div className="rounded-lg border border-border bg-secondary p-4 text-sm text-muted-foreground">{message}</div>}
-
+      <Card className="border-cyan-500/30 bg-cyan-500/5">
+        <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 mb-2">Zero Integration Ready</Badge>
+        <p className="text-sm text-muted-foreground">Connect live integrations in Settings when you&apos;re ready to go beyond demo mode.</p>
+      </Card>
       <div className="flex flex-wrap gap-2">
         {types.map((type) => (
           <button

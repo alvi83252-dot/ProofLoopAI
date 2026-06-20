@@ -1,0 +1,132 @@
+{
+  "examples": [
+    {
+      "id": "financial-roi",
+      "title": "Financial ROI from customer email",
+      "sourceId": "enterprise-email",
+      "inputSnippet": "We saved £40,000 in operational costs",
+      "expectedOutputs": [
+        {
+          "quote": "We saved £40,000 in operational costs after using your platform for just 3 months.",
+          "category": "Financial Impact",
+          "signalType": "Revenue Savings",
+          "strength": 98,
+          "proofScore": 96,
+          "recommendedUses": ["Landing Page Hero", "Sales Deck", "Case Study", "LinkedIn Post"]
+        }
+      ]
+    },
+    {
+      "id": "time-savings",
+      "title": "Time savings from support ticket",
+      "sourceId": "support-tickets",
+      "inputSnippet": "save 12 hours per week",
+      "expectedOutputs": [
+        {
+          "quote": "Our recruiters now save 12 hours per week on manual screening.",
+          "category": "Efficiency",
+          "signalType": "Time Savings",
+          "strength": 94,
+          "proofScore": 91,
+          "recommendedUses": ["Landing Page Hero", "LinkedIn Post", "Email Campaign", "Case Study"]
+        }
+      ]
+    },
+    {
+      "id": "growth-conversion",
+      "title": "Growth metric from NPS survey",
+      "sourceId": "nps-survey",
+      "inputSnippet": "Conversion jumped 34%",
+      "expectedOutputs": [
+        {
+          "quote": "Conversion on our landing page jumped 34% after updating the hero with a single ROI quote.",
+          "category": "Growth",
+          "signalType": "Growth Improvement",
+          "strength": 92,
+          "proofScore": 90,
+          "recommendedUses": ["Landing Page Hero", "Case Study", "GTM Playbook"]
+        }
+      ]
+    },
+    {
+      "id": "emotional-outcome",
+      "title": "Emotional outcome from sales call",
+      "sourceId": "sales-transcript",
+      "inputSnippet": "saving their team from burnout",
+      "expectedOutputs": [
+        {
+          "quote": "The emotional moment was seeing a customer quote about saving their team from burnout.",
+          "category": "Emotional Impact",
+          "signalType": "Customer Satisfaction",
+          "strength": 86,
+          "proofScore": 84,
+          "recommendedUses": ["LinkedIn Post", "Founder Content", "Brand Story"]
+        }
+      ]
+    },
+    {
+      "id": "risk-reduction",
+      "title": "Risk reduction from sales call",
+      "sourceId": "sales-transcript",
+      "inputSnippet": "sales cycle by 40%",
+      "expectedOutputs": [
+        {
+          "quote": "One customer reduced their sales cycle by 40% after deploying proof-ranked case studies.",
+          "category": "Sales Enablement",
+          "signalType": "Risk Reduction",
+          "strength": 89,
+          "proofScore": 87,
+          "recommendedUses": ["Sales Deck", "Case Study", "Outreach Sequence"]
+        }
+      ]
+    },
+    {
+      "id": "quantified-outcomes",
+      "title": "Quantified outcomes from G2 review",
+      "sourceId": "g2-review",
+      "inputSnippet": "£2.3M in quantified outcomes",
+      "expectedOutputs": [
+        {
+          "quote": "We uncovered £2.3M in quantified outcomes from customer emails alone.",
+          "category": "Financial Impact",
+          "signalType": "Revenue Savings",
+          "strength": 95,
+          "proofScore": 93,
+          "recommendedUses": ["Landing Page Hero", "Investor Deck", "Case Study"]
+        }
+      ]
+    },
+    {
+      "id": "product-adoption",
+      "title": "Product adoption from enterprise email",
+      "sourceId": "enterprise-email",
+      "inputSnippet": "adoption hit 95%",
+      "expectedOutputs": [
+        {
+          "quote": "Team adoption hit 95% within the first week.",
+          "category": "Product Adoption",
+          "signalType": "Growth Improvement",
+          "strength": 82,
+          "proofScore": 80,
+          "recommendedUses": ["Product Page", "Onboarding Email", "Sales Deck"]
+        }
+      ]
+    },
+    {
+      "id": "efficiency-nps",
+      "title": "Efficiency from NPS survey",
+      "sourceId": "nps-survey",
+      "inputSnippet": "8 hours per rep per week",
+      "expectedOutputs": [
+        {
+          "quote": "Time savings of 8 hours per rep per week with customer satisfaction scores up 28 points.",
+          "category": "Efficiency",
+          "signalType": "Time Savings",
+          "strength": 88,
+          "proofScore": 86,
+          "recommendedUses": ["Email Campaign", "LinkedIn Post", "Case Study"]
+        }
+      ]
+    }
+  ]
+}

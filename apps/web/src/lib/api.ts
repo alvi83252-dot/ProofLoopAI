@@ -42,6 +42,103 @@ export interface ProofSource {
   createdAt: string;
 }
 
+export interface RagStatus {
+  documents: number;
+  chunks: number;
+  unifyConfigured: boolean;
+  unifyBaseUrl: string;
+  embeddingProvider: 'voyage' | 'hash';
+  sources?: Record<string, number>;
+  demoDataSources?: number;
+  demoGuidanceExamples?: number;
+}
+
+export interface DiscoveryRagMeta {
+  ragUsed: boolean;
+  chunksRetrieved: number;
+  demoDataMatched: boolean;
+  indexedChunks: number;
+  mode?: 'paste' | 'upload' | 'demo';
+  chunks: Array<{ id: string; title: string; text: string; score: number; source: string }>;
+}
+
+export interface DemoDataSummary {
+  dir: string;
+  sources: Array<{ id: string; title: string; type: string; fileName: string }>;
+  guidanceExamples: number;
+}
+
+export interface UploadFileMeta {
+  name: string;
+  size: number;
+  parser: string;
+}
+
+export interface FaxxingSocialMatch {
+  platform: string;
+  accountName: string;
+  handle: string;
+  profileUrl: string;
+  postUrl: string;
+  snippet: string;
+  postedAt: string;
+  engagement: { likes: number; comments: number; shares: number };
+  matchScore: number;
+  verified: boolean;
+}
+
+export interface FaxxingValidationResult {
+  quote: string;
+  overallScore: number;
+  credibility: number;
+  socialVerified: boolean;
+  verificationStatus: 'verified' | 'partial' | 'unverified';
+  platformsScanned: string[];
+  matches: FaxxingSocialMatch[];
+  poweredBy: string;
+  summary: string;
+  scannedAt: string;
+}
+
+export interface RagIngestResult {
+  documentsIngested: number;
+  chunksIndexed: number;
+  source: 'unify' | 'demo';
+}
+
+export interface RagQueryResult {
+  query: string;
+  answer: string;
+  chunks: Array<{ id: string; title: string; text: string; score: number; source: string }>;
+  source: 'unify' | 'demo' | 'local';
+}
+
+export interface UnifyNotificationEvent {
+  id: string;
+  event: string;
+  conversationId: string;
+  message: string;
+  timestamp: string;
+  receivedAt: string;
+}
+
+export interface UnifySubscription {
+  subscriptionId: string;
+  topic: string;
+  subjectFilter: string;
+  webhookUrl: string;
+  createdAt: string;
+}
+
+export interface UnifyNotificationsStatus {
+  service: string;
+  mode: string;
+  provider: string;
+  subscriptions: number;
+  eventsReceived: number;
+  endpoints: Record<string, string>;
+}
+
 export interface DashboardData {
   workspaceId: string;
   stats: {
@@ -81,12 +178,36 @@ export const api = {
   getRankings: () => request<(TrustSignal & { rank: number })[]>('/api/rankings'),
   getAudiences: () => request<unknown[]>('/api/audiences'),
   expandAudience: (proofQuote: string) =>
-    request<{ audiences: unknown[]; poweredBy: string }>('/api/audiences/expand', {
+    request<{ audiences: unknown[]; poweredBy: string; ragContext?: RagQueryResult }>('/api/audiences/expand', {
       method: 'POST',
       body: JSON.stringify({ proofQuote })
     }),
+  getRagStatus: () => request<RagStatus>('/api/rag/status'),
+  ingestRag: (force = false) =>
+    request<RagIngestResult>('/api/rag/ingest', { method: 'POST', body: JSON.stringify({ force }) }),
+  queryRag: (query: string, topK = 5) =>
+    request<RagQueryResult>('/api/rag/query', { method: 'POST', body: JSON.stringify({ query, topK }) }),
+  getUnifyConversations: () => request<{ conversations: unknown[]; source: string; total: number }>('/api/unify/conversations'),
+  getUnifyNotificationsStatus: () => request<UnifyNotificationsStatus>('/api/unify/notifications/status'),
+  getUnifySubscriptions: () => request<UnifySubscription[]>('/api/unify/notifications/subscriptions'),
+  getUnifyNotificationEvents: () => request<UnifyNotificationEvent[]>('/api/unify/notifications/events'),
+  subscribeUnifyNotifications: (data: { topic: string; subjectFilter: string; webhookUrl: string }) =>
+    request<{ status: string; subscriptionId: string; topic: string; subjectFilter: string; webhookUrl: string }>(
+      '/api/unify/notifications/subscribe',
+      { method: 'POST', body: JSON.stringify(data) }
+    ),
+  testUnifyNotification: (data: { event: string; conversationId: string; message: string }) =>
+    request<{ status: string; subscriptionsNotified: number }>('/api/unify/notifications/test', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    }),
   getGtmPlaybooks: () => request<unknown[]>('/api/gtm-playbooks'),
   generateGtm: () => request<{ playbooks: unknown[]; poweredBy: string }>('/api/gtmengineer/generate', { method: 'POST' }),
+  generateGtmFromSignals: () =>
+    request<{ playbook: unknown; signalsUsed: unknown[]; metrics: unknown; poweredBy: string }>('/api/gtm/generate', { method: 'POST' }),
+  submitGtmFeedback: (data: { playbookId: string; actionIndex?: number; rating: 'helpful' | 'not_helpful'; comment?: string }) =>
+    request<{ feedback: unknown; metrics: unknown }>('/api/gtm/feedback', { method: 'POST', body: JSON.stringify(data) }),
+  getGtmMetrics: () => request<unknown>('/api/gtm/metrics'),
   getContent: () => request<unknown[]>('/api/content'),
   generateContent: (signalId: string) =>
     request<{ assets: unknown[]; poweredBy: string }>('/api/content/generate', {
@@ -105,18 +226,30 @@ export const api = {
   updateSettings: (data: unknown) =>
     request('/api/settings', { method: 'PATCH', body: JSON.stringify(data) }),
   submitText: (content: string, title?: string, type?: string) =>
-    request<{ source: ProofSource; signals: TrustSignal[]; count: number }>('/api/sources/text', {
+    request<{ source: ProofSource; signals: TrustSignal[]; count: number; rag?: DiscoveryRagMeta }>('/api/sources/text', {
       method: 'POST',
       body: JSON.stringify({ content, title, type })
+    }),
+  discoverDemo: () =>
+    request<{ source: ProofSource; signals: TrustSignal[]; count: number; rag?: DiscoveryRagMeta }>('/api/discovery/demo', {
+      method: 'POST'
     }),
   uploadFile: (file: File) => {
     const form = new FormData();
     form.append('file', file);
-    return request<{ source: ProofSource; signals: TrustSignal[]; count: number }>('/api/sources/upload', {
+    return request<{ source: ProofSource; signals: TrustSignal[]; count: number; rag?: DiscoveryRagMeta; file?: UploadFileMeta; warnings?: string[] }>('/api/sources/upload', {
       method: 'POST',
       body: form
     });
   },
-  getSampleDatasets: () => request<{ id: string; name: string; type: string }[]>('/api/demo/sample-datasets'),
+  getFaxxingStatus: () => request<{ service: string; mode: string; endpoint: string; platforms: string[] }>('/api/faxxing/status'),
+  validateWithFaxxing: (quote: string, signalId?: string) =>
+    request<FaxxingValidationResult>('/api/faxxing/validate', {
+      method: 'POST',
+      body: JSON.stringify({ quote, signalId })
+    }),
+  getSupportedTypes: () => request<{ uploads: Record<string, { ext: string; description: string }>; pasteTypes: string[] }>('/api/rag/supported-types'),
+  getDemoData: () => request<DemoDataSummary>('/api/rag/demo-data'),
+  getSampleDatasets: () => request<{ id: string; name: string; type: string; content: string }[]>('/api/demo/sample-datasets'),
   resetDemo: () => request('/api/demo/reset', { method: 'POST' })
 };

@@ -13,12 +13,12 @@ interface Settings {
 }
 
 const integrations = [
-  { key: 'unify', name: 'Unify', role: 'Proof Expansion Engine', envKeys: ['UNIFY_API_KEY', 'UNIFY_API_URL'] },
-  { key: 'gtmengineer', name: 'GTMengineer.dev', role: 'GTM System Generator', envKeys: ['GTMENGINEER_API_KEY', 'GTMENGINEER_API_URL'], note: 'Simulated internally' },
-  { key: 'faxxing', name: 'Faxxing', role: 'Proof Amplification Engine', envKeys: ['FAXXING_API_KEY', 'FAXXING_API_URL'] },
-  { key: 'zero', name: 'Zero', role: 'Proof CRM', envKeys: ['ZERO_API_KEY', 'ZERO_API_URL'] },
-  { key: 'lightfern', name: 'Lightfern', role: 'Proof Validation Engine', envKeys: ['LIGHTFERN_API_KEY', 'LIGHTFERN_API_URL'] },
-  { key: 'scaile', name: 'Scaile', role: 'Growth Recommendation Engine', envKeys: ['SCAILE_API_KEY', 'SCAILE_API_URL'] }
+  { key: 'unify', name: 'Unify', role: 'Proof expansion from customer conversations' },
+  { key: 'gtmengineer', name: 'GTMengineer.dev', role: 'GTM system and playbook generation' },
+  { key: 'faxxing', name: 'Faxxing', role: 'Social media proof validation' },
+  { key: 'zero', name: 'Zero', role: 'Proof CRM sync' },
+  { key: 'lightfern', name: 'Lightfern', role: 'Proof credibility scoring' },
+  { key: 'scaile', name: 'Scaile', role: 'Growth recommendations' }
 ];
 
 export default function SettingsPage() {
@@ -54,7 +54,7 @@ export default function SettingsPage() {
     <div className="space-y-8 animate-fade-in">
       <div>
         <h1 className="text-3xl font-bold gradient-text">Settings</h1>
-        <p className="text-muted-foreground mt-2">Configure demo mode, AI providers, and sponsor integration ENV keys.</p>
+        <p className="text-muted-foreground mt-2">Configure demo mode and manage integrations.</p>
       </div>
       {message && <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/30 p-4 text-sm text-emerald-400">{message}</div>}
       {settings && (
@@ -70,20 +70,18 @@ export default function SettingsPage() {
         </Card>
       )}
       <Card className="space-y-4">
-        <h2 className="font-semibold">Sponsor Integrations</h2>
-        <p className="text-sm text-muted-foreground">Add API keys to .env to activate live connections.</p>
+        <h2 className="font-semibold">Integrations</h2>
+        <p className="text-sm text-muted-foreground">Partner tools that power ProofLoop features.</p>
         <div className="grid gap-3 md:grid-cols-2">
           {integrations.map((integration) => (
             <div key={integration.key} className="rounded-lg border border-border p-4 space-y-2 hover:border-primary/30 hover:bg-primary/5 transition-all">
               <div className="flex items-center justify-between">
                 <h3 className="font-medium text-sm">{integration.name}</h3>
                 <Badge className={settings?.integrations[integration.key] ? 'bg-emerald-500/20 text-emerald-400' : 'bg-secondary text-muted-foreground'}>
-                  {settings?.integrations[integration.key] ? 'Connected' : 'Ready'}
+                  {settings?.integrations[integration.key] ? 'Connected' : 'Demo mode'}
                 </Badge>
               </div>
               <p className="text-xs text-muted-foreground">{integration.role}</p>
-              {integration.note && <p className="text-xs text-violet-400">{integration.note}</p>}
-              <div className="flex flex-wrap gap-1">{integration.envKeys.map((k) => <code key={k} className="text-[10px] bg-muted px-1.5 py-0.5 rounded">{k}</code>)}</div>
             </div>
           ))}
         </div>

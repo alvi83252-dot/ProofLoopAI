@@ -4,7 +4,9 @@
   "private": true,
   "description": "Turn hidden customer proof into your growth engine.",
   "scripts": {
+    "predev": "node scripts/dev-health-check.mjs",
     "dev": "concurrently -n web,api -c cyan,magenta \"npm run dev --prefix apps/web\" \"npm run dev --prefix apps/api\"",
+    "install:all": "npm install && npm install --prefix apps/web && npm install --prefix apps/api",
     "build": "npm run build --prefix apps/api && npm run build --prefix apps/web",
     "start": "npm run start --prefix apps/api",
     "db:generate": "npm run db:generate --prefix apps/api",

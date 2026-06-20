@@ -1,0 +1,477 @@
+You are a world-class Staff Software Engineer, Principal AI Engineer, GTM Engineer, YC Founder, Startup CTO, Product Architect, Venture Capital Investor, and Hackathon Winner.
+
+You have:
+
+* 20+ years of experience building venture-backed startups
+* Deep expertise in AI systems, GTM engineering, growth systems, and product design
+* Experience judging and winning hackathons
+* Strong knowledge of scalable architecture, modern software engineering, and startup execution
+
+Take a deep breath and think step by step.
+
+Do not rush.
+
+Before writing code:
+
+1. Understand the business problem.
+2. Understand the user.
+3. Understand the GTM workflow.
+4. Design the architecture.
+5. Design the data model.
+6. Design the AI workflows.
+7. Design the sponsor integrations.
+8. Design the user experience.
+9. Design the MVP.
+10. Only then begin implementation.
+
+Challenge assumptions.
+
+If a feature is unnecessary, remove it.
+
+If a feature creates friction, simplify it.
+
+If a workflow is unclear, redesign it.
+
+Think like a founder, engineer, investor, GTM operator, and hackathon judge simultaneously.
+
+Your goal is not to build a demo.
+
+Your goal is to build a venture-scale product that could realistically become a startup after the hackathon.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PROJECT NAME
+
+PROOFLOOP
+
+Tagline:
+
+"Turn hidden customer proof into your growth engine."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CORE INSIGHT
+
+Every company already has proof that their product works.
+
+The problem is that the proof is buried.
+
+It exists inside:
+
+* Customer emails
+* Testimonials
+* Reviews
+* Support tickets
+* Survey responses
+* Sales call transcripts
+* Community comments
+* Customer success notes
+
+Most companies never use this proof.
+
+As a result:
+
+* Marketing becomes generic
+* Sales teams repeat the same work
+* Founders struggle to create content
+* Valuable trust signals are lost
+* Customer success stories disappear
+
+ProofLoop discovers hidden customer proof and transforms it into growth assets.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PROBLEM
+
+Startups generate valuable customer proof every day, but it is scattered across conversations, documents, reviews, emails, and customer interactions.
+
+Most of this proof is never reused.
+
+Companies already possess evidence that their product works.
+
+They simply fail to find it, rank it, and amplify it.
+
+This leads to:
+
+* Lower trust
+* Lower conversion rates
+* Longer sales cycles
+* Weak positioning
+* Generic marketing
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SOLUTION
+
+ProofLoop automatically discovers, ranks, validates, and amplifies customer proof.
+
+Users can:
+
+* Upload PDFs
+* Upload CSVs
+* Upload TXT files
+* Paste testimonials
+* Paste customer emails
+* Paste sales call transcripts
+* Paste support conversations
+
+The platform extracts:
+
+* Outcomes
+* ROI statements
+* Trust signals
+* Differentiators
+* Objections overcome
+* Emotional moments
+* Switching reasons
+
+The platform then generates:
+
+1. Proof Scores
+2. Trust Signal Rankings
+3. Winning Customer Stories
+4. Case Studies
+5. Landing Page Assets
+6. Sales Enablement Assets
+7. LinkedIn Content
+8. Email Campaigns
+9. GTM Assets
+
+Important:
+
+The core value is proof discovery.
+
+Not content generation.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PROOF DISCOVERY ENGINE
+
+This is the moat.
+
+The platform must identify:
+
+* Revenue savings
+* Time savings
+* Cost reductions
+* Risk reductions
+* Growth improvements
+* Customer satisfaction
+* Emotional outcomes
+* Competitive advantages
+
+Example:
+
+Input:
+
+"We saved £40,000 after using this platform."
+
+Output:
+
+Trust Signal:
+Revenue Savings
+
+Category:
+Financial Impact
+
+Strength:
+98/100
+
+Recommended Uses:
+
+* Landing Page Hero
+* Sales Deck
+* Case Study
+* LinkedIn Post
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+DEMO MODE
+
+This is mandatory.
+
+The platform must work immediately.
+
+No integrations required.
+
+Users should receive value within 60 seconds.
+
+Allow:
+
+* File uploads
+* Text pasting
+* Sample datasets
+
+Provide realistic demo data preloaded.
+
+This is critical for hackathon judging.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SPONSOR INTEGRATIONS
+
+Cursor
+
+Role:
+Development Platform
+
+Use Cursor throughout the project for:
+
+* AI development
+* Code generation
+* Refactoring
+* Workflow orchestration
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Unify
+
+Role:
+Proof Expansion Engine
+
+After discovering a strong proof signal:
+
+Use Unify to find:
+
+* Similar companies
+* Similar ICPs
+* Similar audiences
+
+Example:
+
+Proof:
+
+"We saved recruiters 12 hours per week."
+
+Unify identifies:
+
+* Recruitment agencies
+* Staffing companies
+* Talent platforms
+
+Most likely to resonate with that proof.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🟧 1. GTMengineer.dev — No API → You Simulate It
+Reality:
+There is no public API. It’s a portfolio site.
+
+How you use it anyway:
+You create a fake internal API module inside your backend:
+
+Code
+/api/gtmengineer/generate
+This endpoint uses your own AI pipeline (LangGraph + DSPy) to generate:
+
+GTM playbooks
+
+ICPs
+
+Outreach systems
+
+Growth loops
+
+Conversion frameworks
+
+Why this works:
+Hackathon judges don’t care if the API is real — they care that the integration feels real.
+
+How you present it:
+“GTMengineer.dev powers our GTM System Generator.”
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Faxxing
+
+Role:
+Proof Amplification Engine
+
+Transform proof into:
+
+* Founder content
+* LinkedIn content
+* Email campaigns
+* Thought leadership
+* Category narratives
+
+The proof remains the source of truth.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Zero
+
+Role:
+Proof CRM
+
+Store:
+
+* Proof assets
+* Trust signals
+* Generated GTM assets
+* Campaigns
+* Conversion outcomes
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Lightfern
+
+Role:
+Proof Validation Engine
+
+Assign a Proof Score.
+
+Evaluate:
+
+* Credibility
+* Specificity
+* Revenue impact
+* Emotional impact
+* Conversion potential
+
+Example:
+
+"We saved £40,000"
+
+Proof Score:
+96/100
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Scaile
+
+Role:
+Growth Recommendation Engine
+
+Determine:
+
+* Which proof converts best
+* Which audience responds best
+* Which trust signals should be scaled
+
+Generate:
+
+* Growth plans
+* Expansion recommendations
+* Prioritization frameworks
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TECH STACK
+
+Use technologies that stand out on a CV.
+
+Frontend:
+
+* SvelteKit
+* TypeScript
+* TailwindCSS
+* Shadcn-Svelte
+* D3.js
+
+Backend:
+
+* Hono
+* Bun
+
+Run command:
+
+bun run dev
+
+Database:
+
+* PostgreSQL
+* Drizzle ORM
+
+AI:
+
+* LangGraph
+* DSPy
+* Voyage AI
+
+Search:
+
+* Typesense
+
+Observability:
+
+* OpenTelemetry
+* Grafana
+
+Deployment:
+
+* Fly.io
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AI WORKFLOW
+
+STEP 1
+
+Upload customer data.
+
+STEP 2
+
+Extract:
+
+* outcomes
+* ROI
+* emotions
+* differentiators
+
+STEP 3
+
+Lightfern assigns Proof Scores.
+
+STEP 4
+
+Rank trust signals.
+
+STEP 5
+
+Unify finds lookalike audiences.
+
+STEP 6
+
+GTMengineer.dev generates GTM systems.
+
+STEP 7
+
+Faxxing creates amplification assets.
+
+STEP 8
+
+Zero stores proof intelligence.
+
+STEP 9
+
+Scaile creates growth recommendations.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+DASHBOARD PAGES
+
+1. Home
+2. Proof Discovery
+3. Trust Signals
+4. Proof Rankings
+5. Audience Expansion
+6. GTM Playbooks
+7. Content Studio
+8. Proof CRM
+9. Growth Recommendations
+10. Analytics
+11. Settings
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FINAL PITCH
+
+Most companies already have proof that their product works.
+
+The problem is that the proof is buried across emails, reviews, testimonials, support conversations, and customer interactions.
+
+ProofLoop discovers hidden customer proof, identifies the strongest trust signals, validates them, and transforms them into GTM assets that help companies convert more customers.
+
+Instead of creating more marketing, ProofLoop helps companies amplify the evidence they already have.
+
+
+Another thing is that ensure the full programe runs using npm run dev and ensure you put docker and make it ready for deployment on vercel meeting all of its requirements

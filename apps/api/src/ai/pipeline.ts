@@ -47,7 +47,7 @@ function extractQuotes(text: string): string[] {
   const sentences = text
     .split(/(?<=[.!?])\s+|\n+/)
     .map((s) => s.trim())
-    .filter((s) => s.length > 30);
+    .filter((s) => s.length > 30 && !/^Subject:/i.test(s) && !/^score,comment/i.test(s));
 
   const quoted = text.match(/"([^"]{20,})"/g)?.map((q) => q.replace(/"/g, '')) ?? [];
   const candidates = [...new Set([...quoted, ...sentences])];
@@ -67,8 +67,16 @@ function recommendedUses(category: string, signalType: string): string[] {
   return [...new Set(uses)];
 }
 
-/** LangGraph-style multi-step proof discovery pipeline (demo implementation) */
-export async function runProofDiscoveryPipeline(content: string): Promise<ExtractedSignal[]> {
+/** LangGraph-style multi-step proof discovery pipeline (RAG context optional) */
+export async function runProofDiscoveryPipeline(content: string, ragContext?: string): Promise<ExtractedSignal[]> {
+  if (process.env.OPENAI_API_KEY && ragContext) {
+    try {
+      return await extractWithOpenAI(content, ragContext);
+    } catch {
+      /* fall through to rule-based */
+    }
+  }
+
   const quotes = extractQuotes(content);
   if (quotes.length === 0) {
     const trimmed = content.trim().slice(0, 200);
@@ -100,6 +108,64 @@ export async function runProofDiscoveryPipeline(content: string): Promise<Extrac
   });
 }
 
+async function extractWithOpenAI(content: string, ragContext: string): Promise<ExtractedSignal[]> {
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content: `You extract customer proof trust signals from text. Use the RAG context (demo-data guidance + similar documents) to guide category and recommendedUses. Return JSON array only: [{ "quote", "category", "signalType", "recommendedUses": [] }]`
+        },
+        {
+          role: 'user',
+          content: `RAG CONTEXT:\n${ragContext.slice(0, 3000)}\n\nCUSTOMER DATA:\n${content.slice(0, 4000)}\n\nExtract all trust signals with proof quotes.`
+        }
+      ],
+      temperature: 0.2,
+      response_format: { type: 'json_object' }
+    })
+  });
+
+  if (!res.ok) throw new Error('OpenAI extraction failed');
+  const data = (await res.json()) as { choices: { message: { content: string } }[] };
+  const parsed = JSON.parse(data.choices[0]?.message?.content ?? '{}') as {
+    signals?: Partial<ExtractedSignal>[];
+    trust_signals?: Partial<ExtractedSignal>[];
+  };
+  const raw = parsed.signals ?? parsed.trust_signals ?? (Array.isArray(parsed) ? parsed : []);
+
+  return (raw as Partial<ExtractedSignal>[]).map((s) => {
+    const quote = s.quote ?? '';
+    const { category, signalType } = s.category ? { category: s.category, signalType: s.signalType ?? 'Differentiator' } : detectCategory(quote);
+    const specificity = scoreSpecificity(quote);
+    const credibility = Math.min(0.75 + specificity * 0.25, 0.98);
+    const revenueImpact = category === 'Financial Impact' ? 0.88 : 0.6;
+    const emotionalImpact = category === 'Emotional Impact' ? 0.9 : 0.55;
+    const conversionPotential = (specificity + revenueImpact + emotionalImpact) / 3;
+    const proofScore = computeProofScore(specificity, credibility, revenueImpact, emotionalImpact, conversionPotential);
+
+    return {
+      quote,
+      category,
+      signalType,
+      strength: s.strength ?? proofScore,
+      proofScore: s.proofScore ?? proofScore,
+      credibility: s.credibility ?? credibility,
+      specificity: s.specificity ?? specificity,
+      revenueImpact: s.revenueImpact ?? revenueImpact,
+      emotionalImpact: s.emotionalImpact ?? emotionalImpact,
+      conversionPotential: s.conversionPotential ?? conversionPotential,
+      recommendedUses: s.recommendedUses ?? recommendedUses(category, signalType)
+    };
+  }).filter((s) => s.quote.length > 10);
+}
+
 /** DSPy-style proof scoring refinement (Lightfern integration point) */
 export async function scoreProofSignal(signal: ExtractedSignal): Promise<ExtractedSignal> {
   if (process.env.LIGHTFERN_API_KEY && process.env.LIGHTFERN_API_URL) {
@@ -128,15 +194,4 @@ export async function embedText(text: string): Promise<number[] | null> {
   }
 }
 
-export async function parseFileContent(buffer: Buffer, fileName: string): Promise<string> {
-  const ext = fileName.split('.').pop()?.toLowerCase();
-  if (ext === 'pdf') {
-    const pdfParse = (await import('pdf-parse')).default;
-    const parsed = await pdfParse(buffer);
-    return parsed.text;
-  }
-  if (ext === 'csv' || ext === 'txt') {
-    return buffer.toString('utf-8');
-  }
-  return buffer.toString('utf-8');
-}
+import { parseFileContent, validateUploadFile, FileParseError } from '../ai/file-parser.js';

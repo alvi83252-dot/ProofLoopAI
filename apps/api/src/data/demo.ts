@@ -24,7 +24,11 @@ export interface AudienceMatch {
 
 export interface GtmPlaybookContent {
   icp: string;
+  positioning: string;
   outreachSystem: string[];
+  contentIdeas: { title: string; format: string; angle: string }[];
+  landingPageAngles: { headline: string; hook: string; proofQuote: string }[];
+  nextActions: { action: string; impact: string; effort: string; source: string }[];
   growthLoops: string[];
   conversionFramework: string[];
   playbook: string;
@@ -249,11 +253,29 @@ export const DEMO_GTM_PLAYBOOKS = [
     type: 'outreach',
     content: {
       icp: 'Recruitment agencies with 50-500 employees struggling with manual candidate screening',
+      positioning: 'The proof-led GTM platform that turns hidden customer outcomes into your highest-converting sales asset — no case study writers required.',
       outreachSystem: [
         'Lead with the 12 hours/week time savings proof in first touch',
         'Follow up with £40K cost reduction case study for CFO persona',
         'Share emotional burnout prevention story for VP Operations',
         'Close with 34% landing page conversion lift social proof'
+      ],
+      contentIdeas: [
+        { title: 'How Recruiters Save 12 Hours/Week with Proof-Led Outreach', format: 'LinkedIn Post', angle: 'Time savings narrative with specific metric' },
+        { title: 'The £40K ROI Case Study That Closed 3 Enterprise Deals', format: 'Case Study', angle: 'Financial impact story with CFO angle' },
+        { title: 'From Burnout to Breakthrough: The HR Story That Sells Itself', format: 'Blog Post', angle: 'Emotional proof for VP Operations persona' },
+        { title: 'Proof-Led GTM: A New Category for B2B Revenue Teams', format: 'Thought Leadership', angle: 'Category creation for founder-led brand' }
+      ],
+      landingPageAngles: [
+        { headline: 'Turn Customer Proof Into Your Growth Engine', hook: 'Stop writing case studies. Start surfacing the proof your customers already gave you.', proofQuote: '"We saved £40,000 in operational costs in just 3 months."' },
+        { headline: 'The Proof You Need Is Already in Your Inbox', hook: '47 trust signals hidden in your customer conversations. One click to find them all.', proofQuote: '"Conversion jumped 34% after updating our hero with a single ROI quote."' },
+        { headline: 'Close Deals Faster With Proof, Not Adjectives', hook: 'Enterprise buyers trust customer evidence over marketing claims. Here\'s your evidence.', proofQuote: '"One customer reduced their sales cycle by 40% with proof-ranked case studies."' }
+      ],
+      nextActions: [
+        { action: 'Replace current landing page hero with £40K savings proof quote', impact: 'High', effort: 'Low', source: 'Growth Recommendation' },
+        { action: 'Build SDR outbound sequence around top 3 ranked trust signals', impact: 'High', effort: 'Medium', source: 'Growth Recommendation' },
+        { action: 'Publish founder LinkedIn post featuring 12 hours/week time savings proof', impact: 'Medium', effort: 'Low', source: 'Growth Recommendation' },
+        { action: 'Create case study bundle from top 3 signals for sales enablement', impact: 'Medium', effort: 'Medium', source: 'Scaile' }
       ],
       growthLoops: [
         'Customer proof → LinkedIn content → inbound leads → more proof',
@@ -274,11 +296,25 @@ export const DEMO_GTM_PLAYBOOKS = [
     type: 'conversion',
     content: {
       icp: 'Website visitors from paid and organic channels needing immediate trust',
+      positioning: 'Every visitor sees your strongest proof first — dynamically ranked by conversion potential and matched to their buying stage.',
       outreachSystem: [
         'Hero: Top financial proof signal with specific number',
         'Social proof bar: 3 highest-scored trust signals',
         'Feature sections: Map proof to product capabilities',
         'CTA: Use conversion-optimized proof in button context'
+      ],
+      contentIdeas: [
+        { title: 'The ROI of Proof-Led Landing Pages: A Case Study in Conversion', format: 'Data Story', angle: 'Show 34% conversion lift with before/after' },
+        { title: 'Why Enterprise Buyers Trust Customer Proof Over Your Product Team', format: 'LinkedIn Article', angle: 'Trust economics for B2B' },
+        { title: 'How We Found 47 Trust Signals in 2 Years of Support Tickets', format: 'Behind the Scenes', angle: 'Process transparency builds trust' }
+      ],
+      landingPageAngles: [
+        { headline: 'Your Strongest Proof. First. Always.', hook: 'One quote moved conversion 34%. What\'s hiding in your customer data?', proofQuote: '"Conversion on our landing page jumped 34% with a single ROI quote."' },
+        { headline: 'Stop Guessing What Converts. Start Knowing.', hook: 'Ranked trust signals tell you exactly which proof to feature.', proofQuote: '"We uncovered £2.3M in quantified outcomes from customer emails alone."' }
+      ],
+      nextActions: [
+        { action: 'A/B test top 3 proof signals on landing page hero', impact: 'High', effort: 'Low', source: 'Scaile' },
+        { action: 'Add social proof bar with 3 highest-scored trust signals', impact: 'Medium', effort: 'Low', source: 'Growth Recommendation' }
       ],
       growthLoops: [
         'A/B test proof signals → measure conversion → re-rank automatically',

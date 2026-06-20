@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0",
+  "description": "ProofLoop demo data — sample customer proof sources and expected trust signal outputs for RAG-guided discovery.",
+  "sources": [
+    { "id": "enterprise-email", "file": "sources/enterprise-customer-email.txt", "type": "email", "title": "Enterprise Customer Email" },
+    { "id": "g2-review", "file": "sources/g2-review.txt", "type": "review", "title": "G2 Review Bundle" },
+    { "id": "sales-transcript", "file": "sources/sales-call-transcript.txt", "type": "transcript", "title": "Sales Call Transcript" },
+    { "id": "nps-survey", "file": "sources/nps-survey-responses.csv", "type": "survey", "title": "NPS Survey Responses" },
+    { "id": "support-tickets", "file": "sources/support-ticket-archive.txt", "type": "support", "title": "Support Ticket Archive" },
+    { "id": "testimonial", "file": "sources/customer-testimonial.txt", "type": "testimonial", "title": "Customer Testimonial" }
+  ],
+  "guidance": "guidance/trust-signal-examples.json"
+}

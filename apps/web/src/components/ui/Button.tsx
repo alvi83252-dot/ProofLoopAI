@@ -6,9 +6,9 @@ type Variant = 'default' | 'secondary' | 'outline' | 'ghost';
 type Size = 'sm' | 'md' | 'lg';
 
 const variants: Record<Variant, string> = {
-  default: 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/25',
-  secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
-  outline: 'border border-border bg-transparent hover:bg-accent hover:text-accent-foreground',
+  default: 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/30 border border-primary/50 hover:shadow-primary/40 hover:scale-[1.02]',
+  secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border hover:border-primary/30 shadow-sm hover:scale-[1.02]',
+  outline: 'border-2 border-primary/50 bg-card/80 text-foreground hover:bg-primary/10 hover:border-primary hover:scale-[1.02]',
   ghost: 'hover:bg-accent hover:text-accent-foreground'
 };
 
@@ -29,7 +29,7 @@ type Props = {
 
 export function Button({ variant = 'default', size = 'md', href, className, children, ...props }: Props) {
   const classes = cn(
-    'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]',
+    'inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-55 disabled:hover:scale-100 disabled:shadow-none active:scale-[0.98]',
     variants[variant],
     sizes[size],
     className

@@ -89,3 +89,14 @@ body {
   background: hsl(var(--primary) / 0.5);
   border-radius: 4px;
 }
+
+select {
+  color-scheme: dark;
+  color: hsl(var(--foreground));
+  background-color: hsl(var(--card));
+}
+
+select option {
+  background-color: hsl(var(--card));
+  color: hsl(var(--foreground));
+}

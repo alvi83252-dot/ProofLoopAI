@@ -45,6 +45,21 @@ export interface CrmEntry {
   conversionOutcome?: string;
   createdAt: string;
   zeroSync: CrmSyncState;
+export interface FeedbackEntry {
+  id: string;
+  playbookId: string;
+  actionIndex?: number;
+  rating: 'helpful' | 'not_helpful';
+  comment?: string;
+  createdAt: string;
+}
+
+export interface GtmMetrics {
+  playbooksGenerated: number;
+  feedbackSubmitted: number;
+  helpfulCount: number;
+  notHelpfulCount: number;
+  topPerformingSignals: Record<string, number>;
 }
 
 export interface Store {
@@ -52,10 +67,12 @@ export interface Store {
   sources: ProofSource[];
   signals: TrustSignal[];
   audiences: (AudienceMatch & { id: string; trustSignalId?: string })[];
-  playbooks: (typeof DEMO_GTM_PLAYBOOKS[number] & { id: string })[];
+  playbooks: (typeof DEMO_GTM_PLAYBOOKS[number] & { id: string; feedback?: FeedbackEntry[] })[];
   contentAssets: (ContentAssetResult & { id: string; trustSignalId?: string })[];
   crmEntries: CrmEntry[];
   recommendations: (GrowthRecommendationResult & { id: string })[];
+  feedback: FeedbackEntry[];
+  gtmMetrics: GtmMetrics;
   settings: { demoMode: boolean; aiProvider: string; integrations: Record<string, boolean> };
 }
 
@@ -107,6 +124,14 @@ function initStore(): Store {
       ...r,
       proofSignalIds: [`signal-${i + 1}`]
     })),
+    feedback: [],
+    gtmMetrics: {
+      playbooksGenerated: 0,
+      feedbackSubmitted: 0,
+      helpfulCount: 0,
+      notHelpfulCount: 0,
+      topPerformingSignals: {}
+    },
     settings: {
       demoMode: true,
       aiProvider: 'demo',
@@ -158,6 +183,40 @@ export function updateCrmEntryZeroSync(id: string, zeroSync: CrmSyncState) {
   if (!entry) return undefined;
   entry.zeroSync = zeroSync;
   return entry;
+}
+
+export function addPlaybook(playbook: Omit<typeof DEMO_GTM_PLAYBOOKS[number] & { id?: string; feedback?: FeedbackEntry[] }, 'id'>) {
+  const entry = {
+    ...playbook,
+    id: uuidv4(),
+    feedback: []
+  };
+  store.playbooks.unshift(entry);
+  store.gtmMetrics.playbooksGenerated++;
+  return entry;
+}
+
+export function addFeedback(fb: Omit<FeedbackEntry, 'id' | 'createdAt'>) {
+  const entry: FeedbackEntry = {
+    ...fb,
+    id: uuidv4(),
+    createdAt: new Date().toISOString()
+  };
+  store.feedback.unshift(entry);
+  store.gtmMetrics.feedbackSubmitted++;
+  if (fb.rating === 'helpful') store.gtmMetrics.helpfulCount++;
+  else store.gtmMetrics.notHelpfulCount++;
+
+  const playbook = store.playbooks.find((p) => p.id === fb.playbookId);
+  if (playbook) {
+    if (!playbook.feedback) playbook.feedback = [];
+    playbook.feedback.unshift(entry);
+  }
+  return entry;
+}
+
+export function getGtmMetrics(): GtmMetrics {
+  return { ...store.gtmMetrics };
 }
 
 export { DEMO_ANALYTICS, WORKSPACE_ID };

@@ -5,14 +5,32 @@ import { getStore, addSource, addSignals, DEMO_ANALYTICS, resetStore, WORKSPACE_
 import type { CrmEntry } from '../store/memory.js';
 import { runProofDiscoveryPipeline, parseFileContent } from '../ai/pipeline.js';
 import { getZeroSyncStatesForEntries, saveZeroSyncResult } from '../db/zeroSync.js';
+import { getStore, addSource, addSignals, DEMO_ANALYTICS, resetStore, WORKSPACE_ID, addPlaybook, addFeedback, getGtmMetrics } from '../store/memory.js';
+import { parseFileContent, validateUploadFile, FileParseError } from '../ai/file-parser.js';
 import {
-  expandAudience,
+  expandAudienceWithContext,
   generateGtmSystem,
   amplifyProof,
   syncToZero,
   getGrowthRecommendations,
-  validateProof
+  validateProof,
+  isUnifyLive
 } from '../integrations/sponsors.js';
+import {
+  ingestUnifyConversations,
+  ragQuery,
+  getRagStatus,
+  discoverProofWithRag,
+  discoverFromDemoData,
+  getDemoDataSummary
+} from '../rag/pipeline.js';
+import { SUPPORTED_UPLOAD_TYPES, SUPPORTED_PASTE_TYPES } from '../rag/supported-types.js';
+import { loadDemoSources } from '../rag/demo-data-loader.js';
+import { cleanTrustSignals } from '../utils/signals.js';
+import { resetUnifyNotifications } from '../integrations/unify-notifications.js';
+import { fetchUnifyConversations } from '../integrations/unify.js';
+import { validateProofOnSocialMedia, getFaxxingStatus } from '../integrations/faxxing.js';
+import unifyNotificationsRoutes from './unify-notifications.js';
 
 const app = new Hono();
 const rateLimitBuckets = new Map<string, { count: number; windowStart: number }>();
@@ -109,8 +127,12 @@ app.post('/api/sources/text', async (c) => {
     status: 'processing'
   });
 
-  const extracted = await runProofDiscoveryPipeline(body.content);
-  const validated = await Promise.all(extracted.map((s) => validateProof(s)));
+  const discovery = await discoverProofWithRag(body.content, {
+    sourceId: source.id,
+    title: source.title,
+    type: source.type
+  });
+  const validated = await Promise.all(discovery.signals.map((s) => validateProof(s)));
   const signals = addSignals(
     validated.map((s) => ({ workspaceId: WORKSPACE_ID, sourceId: source.id, ...s }))
   );
@@ -122,47 +144,90 @@ app.post('/api/sources/text', async (c) => {
     signals: signals as unknown as Record<string, unknown>[]
   });
 
-  return c.json({ source, signals, count: signals.length });
+  return c.json({ source, signals, count: signals.length, rag: discovery });
 });
 
 app.post('/api/sources/upload', async (c) => {
-  const form = await c.req.parseBody();
-  const file = form['file'];
-  if (!file || !(file instanceof File)) return c.json({ error: 'File is required' }, 400);
+  try {
+    const form = await c.req.parseBody();
+    const file = form['file'];
+    if (!file || !(file instanceof File)) return c.json({ error: 'File is required' }, 400);
 
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const content = await parseFileContent(buffer, file.name);
+    validateUploadFile(file.name, file.size);
 
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const parsed = await parseFileContent(buffer, file.name);
+
+    if (!parsed.text.trim()) {
+      return c.json({
+        error: 'No readable text found in file. Try a text-based PDF, .txt, or .csv with customer quotes.',
+        warnings: parsed.warnings
+      }, 422);
+    }
+
+    const source = addSource({
+      workspaceId: WORKSPACE_ID,
+      type: file.name.split('.').pop()?.toLowerCase() ?? 'file',
+      title: file.name,
+      content: parsed.text,
+      fileName: file.name,
+      status: 'processing'
+    });
+
+    const discovery = await discoverProofWithRag(parsed.text, {
+      sourceId: source.id,
+      title: source.title,
+      type: source.type
+    });
+    const validated = await Promise.all(discovery.signals.map((s) => validateProof(s)));
+    const signals = addSignals(
+      validated.map((s) => ({ workspaceId: WORKSPACE_ID, sourceId: source.id, ...s }))
+    );
+
+    source.status = 'processed';
+    return c.json({
+      source,
+      signals,
+      count: signals.length,
+      rag: discovery,
+      file: { name: file.name, size: file.size, parser: parsed.parser },
+      warnings: parsed.warnings
+    });
+  } catch (e) {
+    const message = e instanceof FileParseError || e instanceof Error ? e.message : 'Upload failed';
+    const status = e instanceof FileParseError ? 400 : 500;
+    console.error('[upload]', message);
+    return c.json({ error: message }, status);
+  }
+});
+
+app.post('/api/discovery/demo', async (c) => {
+  const discovery = await discoverFromDemoData();
   const source = addSource({
     workspaceId: WORKSPACE_ID,
-    type: file.name.split('.').pop() ?? 'file',
-    title: file.name,
-    content,
-    fileName: file.name,
+    type: 'demo',
+    title: 'Demo Data Scan',
+    content: 'Auto-discovered from demo-data folder',
     status: 'processing'
   });
-
-  const extracted = await runProofDiscoveryPipeline(content);
-  const validated = await Promise.all(extracted.map((s) => validateProof(s)));
+  const validated = await Promise.all(discovery.signals.map((s) => validateProof(s)));
   const signals = addSignals(
     validated.map((s) => ({ workspaceId: WORKSPACE_ID, sourceId: source.id, ...s }))
   );
-
   source.status = 'processed';
-  return c.json({ source, signals, count: signals.length });
+  return c.json({ source, signals, count: signals.length, rag: discovery });
 });
 
 app.post('/api/discovery/run', async (c) => {
   const body = await c.req.json<{ content: string }>();
-  const extracted = await runProofDiscoveryPipeline(body.content ?? '');
-  const validated = await Promise.all(extracted.map((s) => validateProof(s)));
-  return c.json({ signals: validated });
+  const discovery = await discoverProofWithRag(body.content ?? '', { sourceId: `temp-${Date.now()}`, title: 'Discovery Run', type: 'paste' });
+  const validated = await Promise.all(discovery.signals.map((s) => validateProof(s)));
+  return c.json({ signals: validated, rag: discovery });
 });
 
 app.get('/api/trust-signals', (c) => {
   const store = getStore();
-  const sorted = [...store.signals].sort((a, b) => b.proofScore - a.proofScore);
-  return c.json(sorted);
+  return c.json(cleanTrustSignals([...store.signals].sort((a, b) => b.proofScore - a.proofScore)));
 });
 
 app.get('/api/trust-signals/:id', (c) => {
@@ -183,21 +248,115 @@ app.get('/api/audiences', (c) => c.json(getStore().audiences));
 
 app.post('/api/audiences/expand', async (c) => {
   const body = await c.req.json<{ proofQuote: string; signalId?: string }>();
-  const audiences = await expandAudience(body.proofQuote);
-  return c.json({ audiences, poweredBy: process.env.UNIFY_API_KEY ? 'unify' : 'demo' });
+  const { audiences, ragContext } = await expandAudienceWithContext(body.proofQuote);
+  return c.json({
+    audiences,
+    ragContext,
+    poweredBy: isUnifyLive() ? 'unify' : ragContext.source === 'demo' ? 'demo' : 'rag'
+  });
 });
 
-app.get('/api/gtm-playbooks', (c) => c.json(getStore().playbooks));
+/** RAG Pipeline endpoints */
+app.get('/api/rag/status', (c) => c.json(getRagStatus()));
+
+app.post('/api/rag/ingest', async (c) => {
+  const body = await c.req.json<{ force?: boolean }>().catch(() => ({ force: false }));
+  const result = await ingestUnifyConversations(body.force ?? false);
+  return c.json(result);
+});
+
+app.post('/api/rag/query', async (c) => {
+  const body = await c.req.json<{ query: string; topK?: number }>();
+  if (!body.query?.trim()) return c.json({ error: 'Query is required' }, 400);
+  const result = await ragQuery(body.query, body.topK ?? 5);
+  return c.json(result);
+});
+
+app.get('/api/unify/conversations', async (c) => {
+  try {
+    const data = await fetchUnifyConversations();
+    return c.json(data);
+  } catch (e) {
+    return c.json({ error: e instanceof Error ? e.message : 'Failed to fetch conversations' }, 502);
+  }
+});
+
+/** Unify — Simulated Mitel Notifications API (no CloudLink tokens required) */
+app.route('/api/unify/notifications', unifyNotificationsRoutes);
+
+app.get('/api/rag/supported-types', (c) =>
+  c.json({ uploads: SUPPORTED_UPLOAD_TYPES, pasteTypes: SUPPORTED_PASTE_TYPES })
+);
+
+app.get('/api/rag/demo-data', (c) => c.json(getDemoDataSummary()));
+
+/** Faxxing — Simulated social media proof validation */
+app.get('/api/faxxing/status', (c) => c.json(getFaxxingStatus()));
+
+app.post('/api/faxxing/validate', async (c) => {
+  const body = await c.req.json<{ quote: string; signalId?: string }>();
+  if (!body.quote?.trim()) return c.json({ error: 'quote is required' }, 400);
+  const result = await validateProofOnSocialMedia(body.quote.trim());
+  return c.json(result);
+});
+
+app.get('/api/gtm-playbooks', (c) => c.json({ playbooks: getStore().playbooks, metrics: getGtmMetrics() }));
 
 app.post('/api/gtmengineer/generate', async (c) => {
   const store = getStore();
   const playbooks = await generateGtmSystem(store.signals.slice(0, 5));
+  const saved = playbooks.map((p) => addPlaybook(p));
   return c.json({
-    playbooks,
+    playbooks: saved,
     poweredBy: 'gtmengineer.dev',
     message: 'GTMengineer.dev powers our GTM System Generator'
   });
 });
+
+app.post('/api/gtm/generate', async (c) => {
+  const store = getStore();
+  const topSignals = [...store.signals].sort((a, b) => b.proofScore - a.proofScore).slice(0, 3);
+
+  const recs = await getGrowthRecommendations(topSignals);
+  const generated = await generateGtmSystem(topSignals);
+
+  const nextActions = (recs ?? []).slice(0, 3).map((r) => ({
+    action: r.title,
+    impact: r.priority === 'high' ? 'High' : r.priority === 'medium' ? 'Medium' : 'Low',
+    effort: r.effort <= 25 ? 'Low' : r.effort <= 50 ? 'Medium' : 'High',
+    source: process.env.SCAILE_API_KEY ? 'Scaile' : 'GTM System'
+  }));
+
+  const playbook = {
+    ...generated[0],
+    content: {
+      ...generated[0].content,
+      nextActions: [...nextActions, ...generated[0].content.nextActions.slice(0, 1)]
+    }
+  };
+
+  const saved = addPlaybook(playbook);
+  return c.json({
+    playbook: saved,
+    signalsUsed: topSignals.map((s) => ({ id: s.id, quote: s.quote, proofScore: s.proofScore, signalType: s.signalType })),
+    metrics: getGtmMetrics(),
+    poweredBy: process.env.SCAILE_API_KEY ? 'scaile' : 'demo'
+  });
+});
+
+app.post('/api/gtm/feedback', async (c) => {
+  const body = await c.req.json<{ playbookId: string; actionIndex?: number; rating: 'helpful' | 'not_helpful'; comment?: string }>();
+  if (!body.playbookId || !body.rating) return c.json({ error: 'playbookId and rating are required' }, 400);
+  const entry = addFeedback({
+    playbookId: body.playbookId,
+    actionIndex: body.actionIndex,
+    rating: body.rating,
+    comment: body.comment
+  });
+  return c.json({ feedback: entry, metrics: getGtmMetrics() });
+});
+
+app.get('/api/gtm/metrics', (c) => c.json(getGtmMetrics()));
 
 app.get('/api/content', (c) => c.json(getStore().contentAssets));
 
@@ -279,17 +438,19 @@ app.patch('/api/settings', async (c) => {
 
 app.post('/api/demo/reset', (c) => {
   resetStore();
+  resetUnifyNotifications();
   return c.json({ message: 'Demo data reset' });
 });
 
 app.get('/api/demo/sample-datasets', (c) => {
-  return c.json([
-    { id: 'enterprise-email', name: 'Enterprise Customer Email', type: 'email' },
-    { id: 'g2-review', name: 'G2 Review Bundle', type: 'review' },
-    { id: 'sales-transcript', name: 'Sales Call Transcript', type: 'transcript' },
-    { id: 'nps-survey', name: 'NPS Survey Responses', type: 'survey' },
-    { id: 'support-tickets', name: 'Support Ticket Archive', type: 'support' }
-  ]);
+  return c.json(
+    loadDemoSources().map((s) => ({
+      id: s.id,
+      name: s.title,
+      type: s.type,
+      content: s.content
+    }))
+  );
 });
 
 export default app;
