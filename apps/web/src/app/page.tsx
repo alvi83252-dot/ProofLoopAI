@@ -42,7 +42,7 @@ export default function HomePage() {
           <span className="gradient-text">proof into your growth engine</span>
         </h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8 animate-slide-up">
-          ProofLoop discovers proof buried in emails, reviews, calls, and support tickets — then transforms it into trust signals, GTM assets, and growth recommendations.
+          Corroba discovers proof buried in emails, reviews, calls, and support tickets — then transforms it into trust signals, GTM assets, and growth recommendations.
         </p>
         <div className="flex flex-wrap justify-center gap-4 animate-slide-up">
           <Button href="/discovery" size="lg">Start Discovering Proof</Button>

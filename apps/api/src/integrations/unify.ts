@@ -77,13 +77,15 @@ export function getUnifyBaseUrl(): string {
   return getUnifyGtmStatus().dataApiUrl;
 }
 
-/** Proof discovery corpus — demo data (UnifyGTM Data API does not expose chat transcripts) */
+/** Fetch conversations from Unify / Mitel API */
+/**
+ * Deprecated live path: UnifyGTM has no "conversations" endpoint — that was a
+ * Mitel CloudLink mismatch. Corroba's proof corpus now comes from uploads + demo
+ * data, and Unify is integrated via the Analytics API (see unify-analytics.ts).
+ * These demo conversations remain as sample proof sources for the RAG index.
+ */
 export async function fetchUnifyConversations(): Promise<UnifyConversationsResponse> {
-  return {
-    conversations: DEMO_UNIFY_CONVERSATIONS,
-    source: isUnifyGtmConfigured() ? 'unifygtm' : 'demo',
-    total: DEMO_UNIFY_CONVERSATIONS.length
-  };
+  return { conversations: DEMO_UNIFY_CONVERSATIONS, source: 'demo', total: DEMO_UNIFY_CONVERSATIONS.length };
 }
 
 export {

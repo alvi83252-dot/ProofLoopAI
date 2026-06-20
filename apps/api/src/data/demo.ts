@@ -70,7 +70,7 @@ Sarah Chen, VP Operations at TalentFlow`
   {
     type: 'testimonial',
     title: 'Customer Testimonial',
-    content: `"ProofLoop helped us discover testimonials buried in 2 years of support tickets. We found 47 trust signals we never knew existed. Conversion on our landing page jumped 34% after updating the hero with a single ROI quote." — Marcus Webb, CMO at ScaleStack`
+    content: `"Corroba helped us discover testimonials buried in 2 years of support tickets. We found 47 trust signals we never knew existed. Conversion on our landing page jumped 34% after updating the hero with a single ROI quote." — Marcus Webb, CMO at ScaleStack`
   },
   {
     type: 'transcript',
@@ -344,7 +344,7 @@ One of our customers saved £40,000 in 3 months.
 Not from a case study we wrote.
 From an email buried in their inbox.
 
-That's what ProofLoop does — discovers the proof you already have and turns it into your growth engine.
+That's what Corroba does — discovers the proof you already have and turns it into your growth engine.
 
 What's the strongest proof your customers have given you? 👇`
   },
@@ -378,7 +378,7 @@ Want to see what proof is hiding in your customer data?
 TalentFlow's VP Operations struggled to quantify product value for enterprise prospects. Marketing was generic. Sales cycles stretched to 90+ days.
 
 ## Proof Discovered
-ProofLoop surfaced a buried customer email: "We saved £40,000 in operational costs after using your platform for just 3 months."
+Corroba surfaced a buried customer email: "We saved £40,000 in operational costs after using your platform for just 3 months."
 
 ## Results
 - 34% landing page conversion lift

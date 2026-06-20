@@ -169,7 +169,7 @@ export async function validateProofOnSocialMedia(quote: string): Promise<Faxxing
         const data = (await res.json()) as FaxxingValidationResult;
         return {
           ...data,
-          matches: data.matches.map((m) => normalizeMatch(m as SocialProofMatch))
+          matches: (data.matches ?? []).map((m) => normalizeMatch(m as SocialProofMatch))
         };
       }
     } catch {
