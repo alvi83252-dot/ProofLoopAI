@@ -42,7 +42,12 @@ export function getDemoDataDir(): string {
 function readManifest(): Manifest | null {
   const manifestPath = join(getDemoDataDir(), 'manifest.json');
   if (!existsSync(manifestPath)) return null;
-  return JSON.parse(readFileSync(manifestPath, 'utf-8')) as Manifest;
+  try {
+    return JSON.parse(readFileSync(manifestPath, 'utf-8')) as Manifest;
+  } catch (e) {
+    console.warn('[demo-data] Failed to parse manifest.json:', e instanceof Error ? e.message : e);
+    return null;
+  }
 }
 
 export function loadDemoSources(): DemoSource[] {
@@ -72,8 +77,13 @@ export function loadDemoGuidance(): DemoGuidanceExample[] {
   const guidancePath = join(getDemoDataDir(), manifest.guidance);
   if (!existsSync(guidancePath)) return [];
 
-  const data = JSON.parse(readFileSync(guidancePath, 'utf-8')) as { examples: DemoGuidanceExample[] };
-  return data.examples ?? [];
+  try {
+    const data = JSON.parse(readFileSync(guidancePath, 'utf-8')) as { examples: DemoGuidanceExample[] };
+    return data.examples ?? [];
+  } catch (e) {
+    console.warn('[demo-data] Failed to parse guidance file:', e instanceof Error ? e.message : e);
+    return [];
+  }
 }
 
 export function getDemoSourceById(id: string): DemoSource | undefined {

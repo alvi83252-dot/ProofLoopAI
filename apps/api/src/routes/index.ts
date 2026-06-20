@@ -258,7 +258,8 @@ app.get('/api/rankings', (c) => {
 app.get('/api/audiences', (c) => c.json(getStore().audiences));
 
 app.post('/api/audiences/expand', async (c) => {
-  const body = await c.req.json<{ proofQuote: string; signalId?: string }>();
+  const body = await c.req.json<{ proofQuote: string; signalId?: string }>().catch(() => ({ proofQuote: '' }));
+  if (!body.proofQuote?.trim()) return c.json({ error: 'proofQuote is required' }, 400);
   const { audiences, ragContext } = await expandAudienceWithContext(body.proofQuote);
   return c.json({
     audiences,

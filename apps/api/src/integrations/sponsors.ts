@@ -40,11 +40,16 @@ export async function generateGtmSystem(proofSignals: ExtractedSignal[]): Promis
         },
         body: JSON.stringify({ signals: proofSignals })
       });
-      if (res.ok) return (await res.json()) as typeof DEMO_GTM_PLAYBOOKS;
+      if (res.ok) {
+        const data = (await res.json()) as typeof DEMO_GTM_PLAYBOOKS;
+        if (Array.isArray(data) && data.length > 0) return data;
+      }
     } catch {
       /* fall through */
     }
   }
+
+  if (proofSignals.length === 0) return DEMO_GTM_PLAYBOOKS.slice(0, 2);
 
   const top = proofSignals.slice(0, 3);
   const [s1, s2, s3] = [
@@ -128,7 +133,10 @@ export async function amplifyProof(signal: ExtractedSignal): Promise<ContentAsse
         },
         body: JSON.stringify({ signal })
       });
-      if (res.ok) return (await res.json()) as ContentAssetResult[];
+      if (res.ok) {
+        const data = (await res.json()) as ContentAssetResult[];
+        if (Array.isArray(data) && data.length > 0) return data;
+      }
     } catch {
       /* fall through */
     }
@@ -151,7 +159,10 @@ export async function getGrowthRecommendations(signals: ExtractedSignal[]): Prom
         },
         body: JSON.stringify({ signals })
       });
-      if (res.ok) return (await res.json()) as GrowthRecommendationResult[];
+      if (res.ok) {
+        const data = (await res.json()) as GrowthRecommendationResult[];
+        if (Array.isArray(data) && data.length > 0) return data;
+      }
     } catch {
       /* fall through */
     }

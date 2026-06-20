@@ -12,7 +12,7 @@ dotenv.config({ path: resolve(rootDir, '.env.example') });
 dotenv.config();
 import { serve } from '@hono/node-server';
 import app from './routes/index.js';
-import { ingestUnifyConversations, bootstrapRagIndex } from './rag/pipeline.js';
+import { bootstrapRagIndex } from './rag/pipeline.js';
 
 const port = Number(process.env.PORT ?? 3001);
 
