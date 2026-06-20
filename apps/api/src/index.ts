@@ -3,7 +3,12 @@ import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-dotenv.config({ path: resolve(__dirname, '../../../.env') });
+const rootDir = resolve(__dirname, '../../..');
+if (process.env.DOTENV_CONFIG_PATH) {
+  dotenv.config({ path: process.env.DOTENV_CONFIG_PATH });
+}
+dotenv.config({ path: resolve(rootDir, '.env') });
+dotenv.config({ path: resolve(rootDir, '.env.example') });
 dotenv.config();
 import { serve } from '@hono/node-server';
 import app from './routes/index.js';

@@ -1,5 +1,10 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import type { Context } from 'hono';
+import { getStore, addSource, addSignals, DEMO_ANALYTICS, resetStore, WORKSPACE_ID, updateCrmEntryZeroSync } from '../store/memory.js';
+import type { CrmEntry } from '../store/memory.js';
+import { runProofDiscoveryPipeline, parseFileContent } from '../ai/pipeline.js';
+import { getZeroSyncStatesForEntries, saveZeroSyncResult } from '../db/zeroSync.js';
 import { getStore, addSource, addSignals, DEMO_ANALYTICS, resetStore, WORKSPACE_ID, addPlaybook, addFeedback, getGtmMetrics } from '../store/memory.js';
 import { parseFileContent, validateUploadFile, FileParseError } from '../ai/file-parser.js';
 import {
@@ -28,8 +33,71 @@ import { validateProofOnSocialMedia, getFaxxingStatus } from '../integrations/fa
 import unifyNotificationsRoutes from './unify-notifications.js';
 
 const app = new Hono();
+const rateLimitBuckets = new Map<string, { count: number; windowStart: number }>();
+const DB_REQUESTS_PER_SECOND = Math.max(1, Number(process.env.DB_REQUESTS_PER_SECOND ?? 10));
 
-app.use('*', cors({ origin: '*', allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'] }));
+app.use(
+  '*',
+  cors({
+    origin: '*',
+    allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowHeaders: ['Content-Type', 'Authorization', 'x-proofloop-api-key']
+  })
+);
+
+function getClientId(c: Context) {
+  return (
+    c.req.header('cf-connecting-ip') ??
+    c.req.header('x-real-ip') ??
+    c.req.header('x-forwarded-for')?.split(',')[0]?.trim() ??
+    'local'
+  );
+}
+
+app.use('/api/*', async (c, next) => {
+  if (c.req.method === 'OPTIONS') return next();
+
+  const now = Date.now();
+  const clientId = getClientId(c);
+  const bucket = rateLimitBuckets.get(clientId);
+
+  if (!bucket || now - bucket.windowStart >= 1000) {
+    rateLimitBuckets.set(clientId, { count: 1, windowStart: now });
+    c.header('X-RateLimit-Limit', String(DB_REQUESTS_PER_SECOND));
+    c.header('X-RateLimit-Remaining', String(DB_REQUESTS_PER_SECOND - 1));
+    return next();
+  }
+
+  if (bucket.count >= DB_REQUESTS_PER_SECOND) {
+    c.header('Retry-After', '1');
+    c.header('X-RateLimit-Limit', String(DB_REQUESTS_PER_SECOND));
+    c.header('X-RateLimit-Remaining', '0');
+    return c.json({ error: 'Too many database requests. Please retry in a second.' }, 429);
+  }
+
+  bucket.count += 1;
+  c.header('X-RateLimit-Limit', String(DB_REQUESTS_PER_SECOND));
+  c.header('X-RateLimit-Remaining', String(Math.max(0, DB_REQUESTS_PER_SECOND - bucket.count)));
+  return next();
+});
+
+function resolveCrmEntity(entry: CrmEntry): Record<string, unknown> | undefined {
+  const store = getStore();
+  switch (entry.entityType) {
+    case 'trust_signal':
+      return store.signals.find((signal) => signal.id === entry.entityId) as Record<string, unknown> | undefined;
+    case 'content_asset':
+      return store.contentAssets.find((asset) => asset.id === entry.entityId) as Record<string, unknown> | undefined;
+    case 'gtm_playbook':
+      return store.playbooks.find((playbook) => playbook.id === entry.entityId) as Record<string, unknown> | undefined;
+    case 'growth_recommendation':
+      return store.recommendations.find((recommendation) => recommendation.id === entry.entityId) as Record<string, unknown> | undefined;
+    case 'proof_source':
+      return store.sources.find((source) => source.id === entry.entityId) as Record<string, unknown> | undefined;
+    default:
+      return undefined;
+  }
+}
 
 app.get('/health', (c) => c.json({ status: 'ok', service: 'proofloop-api', demo: true }));
 
@@ -70,7 +138,11 @@ app.post('/api/sources/text', async (c) => {
   );
 
   source.status = 'processed';
-  await syncToZero({ type: 'source', source, signals });
+  await syncToZero({
+    type: 'source',
+    source: source as unknown as Record<string, unknown>,
+    signals: signals as unknown as Record<string, unknown>[]
+  });
 
   return c.json({ source, signals, count: signals.length, rag: discovery });
 });
@@ -300,7 +372,41 @@ app.post('/api/content/generate', async (c) => {
   });
 });
 
-app.get('/api/crm', (c) => c.json(getStore().crmEntries));
+app.get('/api/crm', async (c) => {
+  const entries = getStore().crmEntries;
+  const persistedEntries = await getZeroSyncStatesForEntries(entries, WORKSPACE_ID);
+  return c.json(persistedEntries ?? entries);
+});
+
+app.post('/api/crm/sync/:id', async (c) => {
+  const entry = getStore().crmEntries.find((item) => item.id === c.req.param('id'));
+  if (!entry) return c.json({ error: 'CRM entry not found' }, 404);
+
+  const entity = resolveCrmEntity(entry);
+  if (!entity) return c.json({ error: `Linked ${entry.entityType} record not found` }, 404);
+
+  const syncInput = {
+    type: entry.entityType,
+    workspaceId: WORKSPACE_ID,
+    entityId: entry.entityId,
+    title: entry.title,
+    entity,
+    crmEntry: entry as unknown as Record<string, unknown>
+  };
+
+  const result = await syncToZero(syncInput);
+  const persistedSync = await saveZeroSyncResult(syncInput, result);
+
+  const updated = updateCrmEntryZeroSync(entry.id, {
+    status: persistedSync?.status ?? result.status,
+    zeroId: persistedSync?.zeroId ?? result.zeroId,
+    zeroUrl: persistedSync?.zeroUrl ?? result.zeroUrl,
+    error: persistedSync?.error ?? result.error,
+    lastSyncedAt: persistedSync?.lastSyncedAt ?? result.lastSyncedAt
+  });
+
+  return c.json({ result, entry: updated });
+});
 
 app.post('/api/crm/sync', async (c) => {
   const body = await c.req.json();

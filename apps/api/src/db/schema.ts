@@ -6,7 +6,8 @@ import {
   jsonb,
   uuid,
   boolean,
-  real
+  real,
+  uniqueIndex
 } from 'drizzle-orm/pg-core';
 
 export const workspaces = pgTable('workspaces', {
@@ -104,6 +105,34 @@ export const crmEntries = pgTable('crm_entries', {
   metadata: jsonb('metadata').$type<Record<string, unknown>>(),
   createdAt: timestamp('created_at').defaultNow().notNull()
 });
+
+export const zeroSyncRecords = pgTable(
+  'zero_sync_records',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    workspaceId: text('workspace_id').notNull(),
+    entityType: text('entity_type').notNull(),
+    entityId: text('entity_id').notNull(),
+    externalId: text('external_id').notNull(),
+    status: text('status').default('not_synced').notNull(),
+    zeroId: text('zero_id'),
+    zeroUrl: text('zero_url'),
+    error: text('error'),
+    lastPayload: jsonb('last_payload').$type<Record<string, unknown>>(),
+    lastResponse: jsonb('last_response').$type<Record<string, unknown>>(),
+    lastSyncedAt: timestamp('last_synced_at'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull()
+  },
+  (table) => ({
+    entityUnique: uniqueIndex('zero_sync_records_entity_unique').on(
+      table.workspaceId,
+      table.entityType,
+      table.entityId
+    ),
+    externalUnique: uniqueIndex('zero_sync_records_external_unique').on(table.externalId)
+  })
+);
 
 export const growthRecommendations = pgTable('growth_recommendations', {
   id: uuid('id').primaryKey().defaultRandom(),

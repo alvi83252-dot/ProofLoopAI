@@ -1,6 +1,7 @@
 import type { ExtractedSignal } from '../data/demo.js';
 import type { AudienceMatch, GtmPlaybookContent, ContentAssetResult, GrowthRecommendationResult } from '../data/demo.js';
 import { DEMO_AUDIENCES, DEMO_GTM_PLAYBOOKS, DEMO_CONTENT_ASSETS, DEMO_GROWTH_RECOMMENDATIONS } from '../data/demo.js';
+export { syncToZero } from './zero.js';
 import { expandAudienceWithRag } from '../rag/pipeline.js';
 import { isUnifyConfigured } from './unify.js';
 
@@ -138,30 +139,6 @@ export async function amplifyProof(signal: ExtractedSignal): Promise<ContentAsse
     content: asset.content.replace('£40,000', signal.quote.match(/[£$€][\d,]+/)?.[0] ?? '£40,000')
   }));
 }
-
-/** Zero — Proof CRM (integration point) */
-export async function syncToZero(entity: Record<string, unknown>): Promise<{ synced: boolean; zeroId?: string }> {
-  if (process.env.ZERO_API_KEY && process.env.ZERO_API_URL) {
-    try {
-      const res = await fetch(`${process.env.ZERO_API_URL}/proof`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${process.env.ZERO_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(entity)
-      });
-      if (res.ok) {
-        const data = (await res.json()) as { id: string };
-        return { synced: true, zeroId: data.id };
-      }
-    } catch {
-      /* fall through */
-    }
-  }
-  return { synced: false };
-}
-
 /** Scaile — Growth Recommendation Engine (integration point) */
 export async function getGrowthRecommendations(signals: ExtractedSignal[]): Promise<GrowthRecommendationResult[]> {
   if (process.env.SCAILE_API_KEY && process.env.SCAILE_API_URL) {

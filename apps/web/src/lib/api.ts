@@ -153,6 +153,24 @@ export interface DashboardData {
   integrationStatus: Record<string, boolean>;
 }
 
+export interface CrmSyncState {
+  status: 'not_synced' | 'not_configured' | 'synced' | 'failed';
+  zeroId?: string;
+  zeroUrl?: string;
+  error?: string;
+  lastSyncedAt?: string;
+}
+
+export interface CrmEntry {
+  id: string;
+  entityType: string;
+  entityId: string;
+  title: string;
+  status: string;
+  conversionOutcome?: string;
+  zeroSync: CrmSyncState;
+}
+
 export const api = {
   getDashboard: () => request<DashboardData>('/api/dashboard'),
   getSources: () => request<ProofSource[]>('/api/sources'),
@@ -196,7 +214,11 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ signalId })
     }),
-  getCrm: () => request<unknown[]>('/api/crm'),
+  getCrm: () => request<CrmEntry[]>('/api/crm'),
+  syncCrmEntry: (id: string) =>
+    request<{ entry: CrmEntry; result: CrmSyncState & { synced: boolean; mode: string } }>(`/api/crm/sync/${id}`, {
+      method: 'POST'
+    }),
   getGrowth: () => request<unknown[]>('/api/growth'),
   analyzeGrowth: () => request<{ recommendations: unknown[]; poweredBy: string }>('/api/growth/analyze', { method: 'POST' }),
   getAnalytics: () => request<unknown>('/api/analytics'),
